@@ -51,7 +51,8 @@ Element providing you a meatier Lorem Ipsum.
 				 */
 				paragraphs: {
 					type: Number,
-					value: 1
+					value: 1,
+                    notify: true
 				},
 
 
@@ -60,7 +61,10 @@ Element providing you a meatier Lorem Ipsum.
 				 *
 				 * @attribute sentences
 				 */
-				sentences: Number,
+				sentences: {
+                    type: Number,
+                    notify: true
+                },
 
 				/**
 				 * The type of bacon ipsum. Options are 'meat-and-filler' or 'all-meats'.
@@ -70,7 +74,8 @@ Element providing you a meatier Lorem Ipsum.
 				 */
 				type: {
 					type: String,
-					value: 'meat-and-filler'
+					value: 'meat-and-filler',
+                    notify: true
 				},
 
 				/**
@@ -82,7 +87,8 @@ Element providing you a meatier Lorem Ipsum.
 				 */
 				startWithLorem: {
 					type: Boolean,
-					value: true
+					value: true,
+                    notify: true
 				},
 
                 parameters: {
@@ -96,6 +102,10 @@ Element providing you a meatier Lorem Ipsum.
                 }
 			},
 
+            observers: [
+                'computeParams(paragraphs, sentences, type, startWithLorem)'
+            ],
+
             /**
              * This will return the params object for the ajax call to the bacon ipsum api.
              *
@@ -103,12 +113,23 @@ Element providing you a meatier Lorem Ipsum.
              * @return {Object} The parameters that will be passed to the bacon ipsum api.
              */
             ready: function() {
-                this.$$('#meat-api').params = {
-                    "paras": this.paragraphs,
-                    "type": this.type,
-                    "start-with-lorem": this.startWithLorem ? 1 : 0,
-                    "sentences": this.sentences
+                this.computeParams(this.paragraphs, this.sentences, this.type, this.startWithLorem);
+            },
+
+            computeParams: function(paragraphs, sentences, type, startWithLorem) {
+                var params = {
+                    "paras": paragraphs,
+                    "type": type,
+                    "start-with-lorem": startWithLorem ? 1 : 0
                 };
+                if(sentences != undefined) {
+                    params.sentences = sentences;
+                }
+                this.parameters = params;
+            },
+
+            update: function() {
+                this.computeParams(this.paragraphs, this.sentences, this.type, this.startWithLorem);
             },
 
             gotResponse: function() {
