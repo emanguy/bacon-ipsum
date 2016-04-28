@@ -7,8 +7,8 @@
     Code distributed by Google as part of the polymer project is also
     subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
-<link rel="import" href="../polymer/polymer.html">
-<link rel="import" href="../core-ajax/core-ajax.html">
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="bower_components/iron-ajax/iron-ajax.html">
 
 <!--
 Element providing you a meatier Lorem Ipsum.
@@ -20,78 +20,103 @@ Element providing you a meatier Lorem Ipsum.
 @element bacon-ipsum
 @blurb Element providing you a meatier Lorem Ipsum.
 @status alpha
-@homepage https://github.com/pacey/bacon-ipsum
+@homepage https://github.com/mraerino/bacon-ipsum
 -->
-<polymer-element name="bacon-ipsum" attributes="paragraphs sentences type startWithLorem">
+<dom-module id="bacon-ipsum">
 	<template>
-		<core-ajax auto
+		<iron-ajax id="meat-api" auto
 				   url="http://baconipsum.com/api/"
-				   params="{{parameters()}}"
+				   params="[[ parameters ]]"
 				   handleAs="json"
-				   response="{{response}}">
-		</core-ajax>
-		<template repeat="{{bacon in response}}">
-			<p>{{bacon}}</p>
+                   last-response="{{ response }}">
+		</iron-ajax>
+
+		<template is="dom-repeat" items="[[ response ]]" as="bacon">
+			<p>[[ bacon ]]</p>
 		</template>
 	</template>
 
 	<script>
 
-		Polymer('bacon-ipsum', {
-			/**
-			 * The number of paragraphs.
-			 *
-			 * @attribute paragraphs
-			 * @type Number
-			 * @default 1
-			 */
-			paragraphs: 1,
+		Polymer({
+
+			is: 'bacon-ipsum',
+
+			properties: {
+				/**
+				 * The number of paragraphs.
+				 *
+				 * @attribute paragraphs
+				 * @default 1
+				 */
+				paragraphs: {
+					type: Number,
+					value: 1
+				},
 
 
-			/**
-			 * The number of sentences. Overrides the number of paragraphs if set.
-			 *
-			 * @attribute sentences
-			 * @type Number
-			 * @default undefined
-			 */
-			sentences: undefined,
+				/**
+				 * The number of sentences. Overrides the number of paragraphs if set.
+				 *
+				 * @attribute sentences
+				 */
+				sentences: Number,
 
-			/**
-			 * The type of bacon ipsum. Options are 'meat-and-filler' or 'all-meats'.
-			 *
-			 * @attribute type
-			 * @type String
-			 * @default 'meat-and-filler'
-			 */
-			type: 'meat-and-filler',
+				/**
+				 * The type of bacon ipsum. Options are 'meat-and-filler' or 'all-meats'.
+				 *
+				 * @attribute type
+				 * @default 'meat-and-filler'
+				 */
+				type: {
+					type: String,
+					value: 'meat-and-filler'
+				},
 
-			/**
-			 * Controls whether the first paragraph begins with bacon ipsum etc.
-			 *
-			 * @attribute startWithLorem
-			 * @type Boolean
-			 * @default true
-			 */
-			startWithLorem: true,
+				/**
+				 * Controls whether the first paragraph begins with bacon ipsum etc.
+				 *
+				 * @attribute startWithLorem
+				 * @type Boolean
+				 * @default true
+				 */
+				startWithLorem: {
+					type: Boolean,
+					value: true
+				},
 
-			/**
-			 * This will return the params object for the ajax call to the bacon ipsum api.
-			 *
-			 * @method parameters
-			 * @return {Object} The parameters that will be passed to the bacon ipsum api.
-			 */
-			parameters: function (){
-				return {
-					"paras": this.paragraphs,
-					"type": this.type,
-					"start-with-lorem": this.startWithLorem ? 1 : 0,
-					"sentences": this.sentences
-				}
-			}
+                parameters: {
+                    type: Object,
+                    value: {}
+                },
 
-		});
+                response: {
+                    type: Array,
+                    observer: "gotResponse"
+                }
+			},
+
+            /**
+             * This will return the params object for the ajax call to the bacon ipsum api.
+             *
+             * @method parameters
+             * @return {Object} The parameters that will be passed to the bacon ipsum api.
+             */
+            ready: function() {
+                this.$$('#meat-api').params = {
+                    "paras": this.paragraphs,
+                    "type": this.type,
+                    "start-with-lorem": this.startWithLorem ? 1 : 0,
+                    "sentences": this.sentences
+                };
+            },
+
+            gotResponse: function() {
+                this.fire('bacon', { items: this.response });
+            }
+
+        });
 
 	</script>
 
-</polymer-element>
+</dom-module>
